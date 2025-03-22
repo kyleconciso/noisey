@@ -1,5 +1,7 @@
 # ⛰️ noisey
 
+ ![Cover photo](https://github.com/kyleconciso/noisey/blob/main/cover.png)
+
 noisey is a web-based noise generation tool that allows you to create and visualize complex noise patterns using multiple layers. It's built with React, Redux, and Material UI, and uses Three.js for 3D rendering. You can interactively adjust parameters, blend layers, and export/import configurations.
 
 ## Features
