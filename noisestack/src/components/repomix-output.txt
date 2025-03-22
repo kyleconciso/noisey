@@ -1,0 +1,1266 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+================================================================
+File Summary
+================================================================
+
+Purpose:
+--------
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+
+File Format:
+------------
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Multiple file entries, each consisting of:
+  a. A separator line (================)
+  b. The file path (File: path/to/file)
+  c. Another separator line
+  d. The full contents of the file
+  e. A blank line
+
+Usage Guidelines:
+-----------------
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+
+Notes:
+------
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+
+Additional Info:
+----------------
+
+================================================================
+Directory Structure
+================================================================
+AppLayout.jsx
+ImportExportControls.jsx
+LayerControls.jsx
+LayerList.jsx
+NoiseVisualizer.jsx
+SelectedLayerControls.jsx
+ViewControls.jsx
+
+================================================================
+Files
+================================================================
+
+================
+File: AppLayout.jsx
+================
+// src/components/AppLayout.jsx
+import React from "react";
+import { useSelector } from "react-redux";
+import {
+  Box,
+  Drawer,
+  Divider,
+  Toolbar,
+  Typography,
+  AppBar,
+  Paper,
+  Container,
+  useTheme,
+} from "@mui/material";
+import NoiseVisualization from "../components/NoiseVisualizer";
+import LayerList from "./LayerList";
+import SelectedLayerControls from "./SelectedLayerControls";
+import ImportExportControls from "./ImportExportControls";
+import ViewControls from "./ViewControls";
+
+const drawerWidth = 320; // Slightly wider for better spacing
+
+const AppLayout = () => {
+  const layers = useSelector((state) => state.layers);
+  const settings = useSelector((state) => state.settings);
+  const theme = useTheme();
+
+  return (
+    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+      <AppBar
+        position="fixed"
+        elevation={0}
+        sx={{
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          boxShadow: theme.shadows[2],
+          backgroundColor: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+        }}
+      >
+        <Toolbar>
+          <Typography
+            variant="h5"
+            component="h1"
+            fontWeight="500"
+            sx={{ mr: 4 }}
+          >
+            Noise Generator
+          </Typography>
+          <ViewControls />
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          [`& .MuiDrawer-paper`]: {
+            width: drawerWidth,
+            boxSizing: "border-box",
+            backgroundColor: (theme) => theme.palette.background.default,
+            boxShadow: theme.shadows[2],
+            border: "none",
+          },
+        }}
+      >
+        <Toolbar />
+        <Box
+          sx={{
+            overflow: "auto",
+            padding: theme.spacing(3),
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <LayerList />
+          <Divider sx={{ my: 3 }} />
+          <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
+            <SelectedLayerControls />
+          </Box>
+          <ImportExportControls />
+        </Box>
+      </Drawer>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 0,
+          backgroundColor: (theme) => theme.palette.background.default,
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Toolbar />
+        <Container maxWidth="xl" sx={{ flexGrow: 1, py: 4, display: "flex" }}>
+          <Paper
+            elevation={2}
+            sx={{
+              width: "100%",
+              height: "100%",
+              p: 3,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: theme.shape.borderRadius * 1.5,
+              backgroundColor: theme.palette.background.paper,
+              overflow: "hidden",
+            }}
+          >
+            <NoiseVisualization layers={layers.layers} settings={settings} />
+          </Paper>
+        </Container>
+      </Box>
+    </Box>
+  );
+};
+
+export default AppLayout;
+
+================
+File: ImportExportControls.jsx
+================
+// src/components/ImportExportControls.jsx
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setLayers } from "../store/layersSlice";
+import {
+  Button,
+  Box,
+  Typography,
+  Snackbar,
+  Alert,
+  Grid,
+  Paper,
+  Divider,
+  useTheme,
+  alpha,
+} from "@mui/material";
+import DownloadIcon from "@mui/icons-material/Download";
+import UploadIcon from "@mui/icons-material/Upload";
+import SaveIcon from "@mui/icons-material/Save";
+
+const ImportExportControls = () => {
+  const dispatch = useDispatch();
+  const theme = useTheme();
+  const layers = useSelector((state) => state.layers.layers);
+  const [openSnackbar, setOpenSnackbar] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState("success");
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
+  const saveConfig = () => {
+    try {
+      const config = JSON.stringify(layers);
+      const blob = new Blob([config], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "noise-config.json";
+      a.click();
+
+      URL.revokeObjectURL(url);
+      setSnackbarMessage("Configuration saved successfully!");
+      setSnackbarSeverity("success");
+      setOpenSnackbar(true);
+    } catch (error) {
+      console.error("Error saving config", error);
+      setSnackbarMessage("Failed to save configuration.");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+    }
+  };
+
+  const loadConfig = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const loadedLayers = JSON.parse(e.target.result);
+        dispatch(setLayers({ layers: loadedLayers }));
+        setSnackbarMessage("Configuration loaded successfully!");
+        setSnackbarSeverity("success");
+        setOpenSnackbar(true);
+      } catch (error) {
+        console.error("Error loading configuration:", error);
+        setSnackbarMessage("Invalid configuration file.");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+      }
+    };
+    reader.onerror = (error) => {
+      console.error("File Read Error:", error);
+      setSnackbarMessage("Error reading the file");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+    };
+
+    reader.readAsText(file);
+    // Reset the input value to allow loading the same file again
+    event.target.value = null;
+  };
+
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        mt: 4,
+        p: 3,
+        borderRadius: theme.shape.borderRadius * 1.5,
+        backgroundColor: alpha(theme.palette.background.paper, 0.6),
+        border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+      }}
+    >
+      <Box display="flex" alignItems="center" mb={2}>
+        <SaveIcon sx={{ mr: 1, color: theme.palette.primary.main }} />
+        <Typography variant="h6" fontWeight="500">
+          Save & Load
+        </Typography>
+      </Box>
+      <Divider sx={{ mb: 3 }} />
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <Button
+            variant="contained"
+            fullWidth
+            startIcon={<DownloadIcon />}
+            onClick={saveConfig}
+            sx={{
+              py: 1.2,
+              borderRadius: theme.shape.borderRadius * 1.5,
+              backgroundColor: theme.palette.success.main,
+              "&:hover": {
+                backgroundColor: theme.palette.success.dark,
+              },
+              textTransform: "none",
+              fontWeight: 500,
+            }}
+          >
+            Export Configuration
+          </Button>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<UploadIcon />}
+            component="label"
+            sx={{
+              py: 1.2,
+              borderRadius: theme.shape.borderRadius * 1.5,
+              borderColor: theme.palette.primary.main,
+              color: theme.palette.primary.main,
+              textTransform: "none",
+              fontWeight: 500,
+            }}
+          >
+            Import Configuration
+            <input
+              type="file"
+              accept=".json"
+              onChange={loadConfig}
+              style={{ display: "none" }}
+            />
+          </Button>
+        </Grid>
+      </Grid>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbarSeverity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </Paper>
+  );
+};
+
+export default ImportExportControls;
+
+================
+File: LayerControls.jsx
+================
+// src/components/LayerControls.jsx
+import React from "react";
+import { useDispatch } from "react-redux";
+import {
+  updateLayer,
+  deleteLayer,
+  toggleLayerVisibility,
+} from "../store/layersSlice";
+import {
+  Box,
+  Typography,
+  Slider,
+  IconButton,
+  TextField,
+  Grid,
+  Paper,
+  Tooltip,
+  Divider,
+  useTheme,
+  alpha,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import TuneIcon from "@mui/icons-material/Tune";
+
+const LayerControls = ({ layer }) => {
+  const dispatch = useDispatch();
+  const theme = useTheme();
+
+  const handleUpdate = (updates) => {
+    dispatch(updateLayer({ id: layer.id, updates }));
+  };
+
+  const handleDelete = () => {
+    dispatch(deleteLayer(layer.id));
+  };
+
+  const handleToggleVisibility = () => {
+    dispatch(toggleLayerVisibility(layer.id));
+  };
+
+  return (
+    <Paper
+      elevation={2}
+      sx={{
+        p: 3,
+        mb: 3,
+        borderRadius: theme.shape.borderRadius * 1.5,
+        border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+      }}
+    >
+      <Grid container spacing={2}>
+        <Grid
+          item
+          xs={12}
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          sx={{ mb: 1 }}
+        >
+          <Box display="flex" alignItems="center">
+            <TuneIcon sx={{ mr: 1, color: theme.palette.primary.main }} />
+            <Typography variant="h6" fontWeight="500">
+              {layer.name}
+            </Typography>
+          </Box>
+          <Box>
+            <Tooltip title={layer.visible ? "Hide Layer" : "Show Layer"}>
+              <IconButton
+                onClick={handleToggleVisibility}
+                size="small"
+                color={layer.visible ? "primary" : "default"}
+                sx={{ mr: 1 }}
+              >
+                {layer.visible ? <VisibilityIcon /> : <VisibilityOffIcon />}
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete Layer">
+              <IconButton
+                onClick={handleDelete}
+                size="small"
+                sx={{
+                  color: theme.palette.error.main,
+                  "&:hover": {
+                    backgroundColor: alpha(theme.palette.error.main, 0.1),
+                  },
+                }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Grid>
+
+        <Grid item xs={12}>
+          <Divider sx={{ mb: 2 }} />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Typography
+            variant="body2"
+            fontWeight="500"
+            gutterBottom
+            id={`scale-slider-${layer.id}`}
+            color="text.secondary"
+          >
+            Scale
+          </Typography>
+          <Slider
+            value={layer.scale}
+            min={1}
+            max={100}
+            step={1}
+            onChange={(event, value) => handleUpdate({ scale: value })}
+            valueLabelDisplay="auto"
+            aria-labelledby={`scale-slider-${layer.id}`}
+            sx={{
+              color: theme.palette.primary.main,
+              height: 4,
+              "& .MuiSlider-thumb": {
+                width: 14,
+                height: 14,
+              },
+            }}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Typography
+            variant="body2"
+            fontWeight="500"
+            gutterBottom
+            id={`octaves-slider-${layer.id}`}
+            color="text.secondary"
+          >
+            Octaves
+          </Typography>
+          <Slider
+            value={layer.octaves}
+            min={1}
+            max={8}
+            step={1}
+            onChange={(event, value) => handleUpdate({ octaves: value })}
+            valueLabelDisplay="auto"
+            aria-labelledby={`octaves-slider-${layer.id}`}
+            sx={{
+              color: theme.palette.primary.main,
+              height: 4,
+              "& .MuiSlider-thumb": {
+                width: 14,
+                height: 14,
+              },
+            }}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Typography
+            variant="body2"
+            fontWeight="500"
+            gutterBottom
+            id={`persistence-slider-${layer.id}`}
+            color="text.secondary"
+          >
+            Persistence
+          </Typography>
+          <Slider
+            value={layer.persistence * 100}
+            min={0}
+            max={100}
+            step={1}
+            onChange={(event, value) =>
+              handleUpdate({ persistence: value / 100 })
+            }
+            valueLabelDisplay="auto"
+            aria-labelledby={`persistence-slider-${layer.id}`}
+            sx={{
+              color: theme.palette.primary.main,
+              height: 4,
+              "& .MuiSlider-thumb": {
+                width: 14,
+                height: 14,
+              },
+            }}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Typography
+            variant="body2"
+            fontWeight="500"
+            gutterBottom
+            id={`lacunarity-slider-${layer.id}`}
+            color="text.secondary"
+          >
+            Lacunarity
+          </Typography>
+          <Slider
+            value={layer.lacunarity * 100}
+            min={100}
+            max={300}
+            step={1}
+            onChange={(event, value) =>
+              handleUpdate({ lacunarity: value / 100 })
+            }
+            valueLabelDisplay="auto"
+            aria-labelledby={`lacunarity-slider-${layer.id}`}
+            sx={{
+              color: theme.palette.primary.main,
+              height: 4,
+              "& .MuiSlider-thumb": {
+                width: 14,
+                height: 14,
+              },
+            }}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Typography
+            variant="body2"
+            fontWeight="500"
+            gutterBottom
+            color="text.secondary"
+          >
+            Seed
+          </Typography>
+          <TextField
+            type="number"
+            value={layer.seed}
+            onChange={(e) =>
+              handleUpdate({ seed: parseInt(e.target.value) || 0 })
+            }
+            variant="outlined"
+            fullWidth
+            size="small"
+            InputProps={{
+              sx: {
+                borderRadius: theme.shape.borderRadius * 1.5,
+                border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+              },
+            }}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Typography
+            variant="body2"
+            fontWeight="500"
+            gutterBottom
+            id={`weight-slider-${layer.id}`}
+            color="text.secondary"
+          >
+            Weight
+          </Typography>
+          <Slider
+            value={layer.weight * 100}
+            min={0}
+            max={100}
+            step={1}
+            onChange={(event, value) => handleUpdate({ weight: value / 100 })}
+            valueLabelDisplay="auto"
+            aria-labelledby={`weight-slider-${layer.id}`}
+            sx={{
+              color: theme.palette.primary.main,
+              height: 4,
+              "& .MuiSlider-thumb": {
+                width: 14,
+                height: 14,
+              },
+            }}
+          />
+        </Grid>
+      </Grid>
+    </Paper>
+  );
+};
+
+export default LayerControls;
+
+================
+File: LayerList.jsx
+================
+// src/components/LayerList.jsx
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addLayer,
+  setSelectedLayerId,
+  clearSelectedLayerId,
+  deleteLayer,
+  toggleLayerVisibility,
+} from "../store/layersSlice";
+import {
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  IconButton,
+  ListItemSecondaryAction,
+  Box,
+  Typography,
+  Paper,
+  Button,
+  Tooltip,
+  useTheme,
+  alpha,
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import LayersIcon from "@mui/icons-material/Layers";
+import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+
+const LayerList = () => {
+  const dispatch = useDispatch();
+  const layers = useSelector((state) => state.layers.layers);
+  const selectedLayerId = useSelector((state) => state.layers.selectedLayerId);
+  const theme = useTheme();
+
+  const handleAddLayer = () => {
+    dispatch(
+      addLayer({
+        id: Date.now(),
+        name: `Layer ${layers.length + 1}`,
+        scale: 20,
+        octaves: 3,
+        persistence: 0.5,
+        lacunarity: 2.0,
+        seed: Math.floor(Math.random() * 1000),
+        weight: 0.5,
+        visible: true,
+      })
+    );
+  };
+
+  const handleLayerSelect = (layerId) => {
+    if (selectedLayerId === layerId) {
+      dispatch(clearSelectedLayerId());
+    } else {
+      dispatch(setSelectedLayerId(layerId));
+    }
+  };
+
+  const handleDelete = (e, layerId) => {
+    e.stopPropagation(); // Prevent layer selection
+    dispatch(deleteLayer(layerId));
+  };
+
+  const handleToggleVisibility = (e, layerId) => {
+    e.stopPropagation(); // Prevent layer selection
+    dispatch(toggleLayerVisibility(layerId));
+  };
+
+  return (
+    <Box>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
+        <Typography
+          variant="h6"
+          fontWeight="500"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <LayersIcon
+            sx={{
+              mr: 1,
+              color: theme.palette.primary.main,
+            }}
+          />
+          Noise Layers
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={handleAddLayer}
+          sx={{
+            borderRadius: theme.shape.borderRadius * 1.5,
+            boxShadow: theme.shadows[2],
+            textTransform: "none",
+          }}
+        >
+          Add Layer
+        </Button>
+      </Box>
+      <List sx={{ mb: 2 }}>
+        {layers.map((layer) => (
+          <ListItem
+            key={layer.id}
+            component={Paper}
+            elevation={selectedLayerId === layer.id ? 3 : 1}
+            sx={{
+              mb: 1.5,
+              p: 0,
+              borderRadius: theme.shape.borderRadius * 1.5,
+              transition: theme.transitions.create(
+                ["box-shadow", "background-color"],
+                {
+                  duration: theme.transitions.duration.short,
+                }
+              ),
+              border:
+                selectedLayerId === layer.id
+                  ? `1px solid ${alpha(theme.palette.primary.main, 0.5)}`
+                  : `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+              backgroundColor:
+                selectedLayerId === layer.id
+                  ? alpha(theme.palette.primary.main, 0.05)
+                  : theme.palette.background.paper,
+              overflow: "hidden",
+            }}
+          >
+            <ListItemButton
+              onClick={() => handleLayerSelect(layer.id)}
+              sx={{
+                py: 1.5,
+                "&:hover": {
+                  backgroundColor:
+                    selectedLayerId === layer.id
+                      ? alpha(theme.palette.primary.main, 0.1)
+                      : theme.palette.action.hover,
+                },
+              }}
+            >
+              <ListItemText
+                primary={
+                  <Typography
+                    variant="body1"
+                    fontWeight={selectedLayerId === layer.id ? 500 : 400}
+                    sx={{
+                      color:
+                        selectedLayerId === layer.id
+                          ? theme.palette.primary.main
+                          : theme.palette.text.primary,
+                    }}
+                  >
+                    {layer.name}
+                  </Typography>
+                }
+              />
+              <ListItemSecondaryAction sx={{ right: 8 }}>
+                <Tooltip title={layer.visible ? "Hide Layer" : "Show Layer"}>
+                  <IconButton
+                    edge="end"
+                    onClick={(e) => handleToggleVisibility(e, layer.id)}
+                    size="small"
+                    color={layer.visible ? "primary" : "default"}
+                    sx={{ mr: 1 }}
+                  >
+                    {layer.visible ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Delete Layer">
+                  <IconButton
+                    edge="end"
+                    onClick={(e) => handleDelete(e, layer.id)}
+                    size="small"
+                    sx={{
+                      color: theme.palette.error.main,
+                      "&:hover": {
+                        backgroundColor: alpha(theme.palette.error.main, 0.1),
+                      },
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Tooltip>
+              </ListItemSecondaryAction>
+            </ListItemButton>
+          </ListItem>
+        ))}
+        {layers.length === 0 && (
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              textAlign: "center",
+              border: `1px dashed ${alpha(theme.palette.divider, 0.3)}`,
+              borderRadius: theme.shape.borderRadius * 1.5,
+            }}
+          >
+            <LayersIcon
+              sx={{
+                fontSize: 40,
+                color: alpha(theme.palette.text.secondary, 0.5),
+                mb: 1,
+              }}
+            />
+            <Typography variant="body2" color="text.secondary">
+              No layers available
+            </Typography>
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<AddIcon />}
+              onClick={handleAddLayer}
+              sx={{
+                mt: 2,
+                borderRadius: theme.shape.borderRadius * 1.5,
+                textTransform: "none",
+              }}
+            >
+              Add Your First Layer
+            </Button>
+          </Paper>
+        )}
+      </List>
+    </Box>
+  );
+};
+
+export default LayerList;
+
+================
+File: NoiseVisualizer.jsx
+================
+// src/components/NoiseVisualization.jsx
+import React, { useState, useEffect, useRef } from "react";
+import * as THREE from "three";
+import { OrbitControls } from "three-stdlib";
+import { generatePerlinNoise } from "../utils";
+import { Box } from "@mui/material";
+
+const NoiseVisualizer = ({ layers, settings }) => {
+  const canvasRef = useRef(null);
+  const threeContainerRef = useRef(null);
+  const [rendererInstance, setRendererInstance] = useState(null);
+  const [controls, setControls] = useState(null); // Keep controls state
+
+  const { viewMode, resolution, hypsometricTinting } = settings;
+
+  useEffect(() => {
+    // Cleanup previous instances
+    if (rendererInstance) {
+      rendererInstance.dispose();
+      rendererInstance.forceContextLoss(); // Corrected method name
+      if (rendererInstance.domElement) {
+        rendererInstance.domElement.parentNode?.removeChild(
+          rendererInstance.domElement
+        ); //clean up dom element
+      }
+      setRendererInstance(null); // Clear renderer instance
+    }
+
+    if (controls) {
+      // Dispose of controls
+      controls.dispose();
+      setControls(null);
+    }
+
+    if (viewMode === "2d") {
+      render2D();
+    } else {
+      render3D();
+    }
+  }, [layers, viewMode, resolution, hypsometricTinting]);
+
+  const render2D = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return; // Check if context is available
+
+    const width = resolution;
+    const height = resolution;
+
+    ctx.clearRect(0, 0, width, height);
+
+    const imageData = ctx.createImageData(width, height);
+    const data = imageData.data;
+
+    const visibleLayers = layers.filter((layer) => layer.visible);
+
+    if (visibleLayers.length === 0) {
+      ctx.fillStyle = "#ddd";
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = "#999";
+      ctx.font = "16px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("No visible layers", width / 2, height / 2);
+      return;
+    }
+
+    const combinedNoise = new Array(width * height).fill(0);
+    let totalWeight = 0;
+
+    visibleLayers.forEach((layer) => {
+      const noise = generatePerlinNoise(
+        width,
+        height,
+        layer.scale,
+        layer.octaves,
+        layer.persistence,
+        layer.lacunarity,
+        layer.seed
+      );
+
+      for (let i = 0; i < noise.length; i++) {
+        combinedNoise[i] += noise[i] * layer.weight;
+      }
+
+      totalWeight += layer.weight;
+    });
+
+    if (totalWeight > 0) {
+      for (let i = 0; i < combinedNoise.length; i++) {
+        combinedNoise[i] /= totalWeight;
+      }
+    }
+
+    for (let i = 0; i < combinedNoise.length; i++) {
+      let pixelValue = Math.floor(combinedNoise[i] * 255);
+      const index = i * 4;
+
+      if (hypsometricTinting) {
+        // Apply hypsometric tinting
+        if (pixelValue < 85) {
+          // 0-84: Blueish
+          data[index] = 0;
+          data[index + 1] = 0;
+          data[index + 2] = pixelValue + 170; // Blue intensity increases
+        } else if (pixelValue < 170) {
+          // 85-169: Greenish
+          data[index] = 0;
+          data[index + 1] = pixelValue + 85; // Green intensity increases
+          data[index + 2] = 0;
+        } else {
+          // 170-255: Yellowish
+          data[index] = pixelValue; // Red intensity increases
+          data[index + 1] = pixelValue; // Green intensity increases
+          data[index + 2] = 0;
+        }
+      } else {
+        // Default grayscale
+        data[index] = pixelValue;
+        data[index + 1] = pixelValue;
+        data[index + 2] = pixelValue;
+      }
+      data[index + 3] = 255;
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+  };
+
+  const render3D = () => {
+    const container = threeContainerRef.current;
+    if (!container) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      resolution / resolution,
+      0.1,
+      1000
+    );
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(resolution, resolution);
+    container.appendChild(renderer.domElement);
+
+    const visibleLayers = layers.filter((layer) => layer.visible);
+    if (visibleLayers.length === 0) {
+      // Display a simple plane with a message if no layers are visible.
+      const geometry = new THREE.PlaneGeometry(1, 1);
+      const material = new THREE.MeshBasicMaterial({ color: 0x888888 });
+      const plane = new THREE.Mesh(geometry, material);
+      scene.add(plane);
+      camera.position.z = 1;
+    } else {
+      const geometry = new THREE.PlaneGeometry(
+        2,
+        2,
+        resolution - 1,
+        resolution - 1
+      );
+
+      // Combine noise from all visible layers
+      const combinedNoise = new Array(resolution * resolution).fill(0);
+      let totalWeight = 0;
+
+      visibleLayers.forEach((layer) => {
+        const noise = generatePerlinNoise(
+          resolution,
+          resolution,
+          layer.scale,
+          layer.octaves,
+          layer.persistence,
+          layer.lacunarity,
+          layer.seed
+        );
+        for (let i = 0; i < noise.length; i++) {
+          combinedNoise[i] += noise[i] * layer.weight;
+        }
+        totalWeight += layer.weight;
+      });
+
+      // Normalize by total weight
+      if (totalWeight > 0) {
+        for (let i = 0; i < combinedNoise.length; i++) {
+          combinedNoise[i] /= totalWeight;
+        }
+      }
+
+      for (let i = 0, l = geometry.attributes.position.count; i < l; i++) {
+        const z = combinedNoise[i] * 0.2; // Scale down the Z for better visualization.  Adjust as needed
+        geometry.attributes.position.setZ(i, z);
+      }
+      geometry.computeVertexNormals();
+
+      const material = new THREE.MeshStandardMaterial({
+        color: 0x55aa55,
+        roughness: 0.7,
+        metalness: 0.1,
+        side: THREE.DoubleSide,
+      });
+
+      const mesh = new THREE.Mesh(geometry, material);
+      scene.add(mesh);
+
+      // Add ambient light
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+      scene.add(ambientLight);
+
+      // Add directional light
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(1, 1, 1); // Adjust light direction
+      scene.add(directionalLight);
+
+      camera.position.z = 2;
+      camera.position.y = 1;
+      camera.lookAt(0, 0, 0);
+
+      const newControls = new OrbitControls(camera, renderer.domElement); // Create new controls
+      setControls(newControls); // Update controls state
+    }
+
+    setRendererInstance(renderer); // Set renderer AFTER setup
+    const animate = () => {
+      if (!rendererInstance) return;
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    };
+
+    animate();
+  };
+
+  return (
+    <Box sx={{ position: "relative" }}>
+      {viewMode === "2d" ? (
+        <canvas
+          ref={canvasRef}
+          width={resolution}
+          height={resolution}
+          style={{
+            border: "1px solid",
+            borderColor: "grey.400",
+            borderRadius: 1,
+            width: "100%", // Make it responsive
+            height: "auto",
+          }}
+        />
+      ) : (
+        <Box
+          ref={threeContainerRef}
+          sx={{
+            width: "100%", // Use 100% width, let height be determined by aspect ratio
+            height: `${resolution}px`,
+            border: "1px solid",
+            borderColor: "grey.400",
+            borderRadius: 1,
+          }}
+        />
+      )}
+    </Box>
+  );
+};
+
+export default NoiseVisualizer;
+
+================
+File: SelectedLayerControls.jsx
+================
+// src/components/SelectedLayerControls.jsx
+import React from "react";
+import { useSelector } from "react-redux";
+import LayerControls from "./LayerControls";
+import { Box, Typography } from "@mui/material";
+
+const SelectedLayerControls = () => {
+  const selectedLayerId = useSelector((state) => state.layers.selectedLayerId);
+  const layers = useSelector((state) => state.layers.layers);
+  const selectedLayer = layers.find((layer) => layer.id === selectedLayerId);
+
+  return (
+    <Box mt={4}>
+      <Typography variant="h6" gutterBottom>
+        Selected Layer Controls
+      </Typography>
+      {selectedLayer ? (
+        <LayerControls layer={selectedLayer} />
+      ) : (
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          align="center"
+          mt={2}
+        >
+          No layer selected. Select a layer to view its controls.
+        </Typography>
+      )}
+    </Box>
+  );
+};
+
+export default SelectedLayerControls;
+
+================
+File: ViewControls.jsx
+================
+// src/components/ViewControls.jsx
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setViewMode,
+  setResolution,
+  toggleHypsometricTinting,
+} from "../store/settingsSlice";
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Box,
+  Typography,
+  Switch,
+  FormControlLabel,
+  FormGroup,
+} from "@mui/material";
+
+const ViewControls = () => {
+  const dispatch = useDispatch();
+  const { viewMode, resolution, hypsometricTinting } = useSelector(
+    (state) => state.settings
+  );
+  const handleToggleHypsometricTinting = () => {
+    dispatch(toggleHypsometricTinting());
+  };
+
+  return (
+    <Box display="flex" alignItems="center" gap={3}>
+      <Typography variant="h6">View Controls</Typography>
+      <FormControl sx={{ minWidth: 120 }} size="small">
+        <InputLabel id="view-mode-label">View Mode</InputLabel>
+        <Select
+          labelId="view-mode-label"
+          value={viewMode}
+          label="View Mode"
+          onChange={(event) => dispatch(setViewMode(event.target.value))}
+        >
+          <MenuItem value="2d">2D Map</MenuItem>
+          <MenuItem value="3d">3D Terrain</MenuItem>
+        </Select>
+      </FormControl>
+
+      <FormControl sx={{ minWidth: 120 }} size="small">
+        <InputLabel id="resolution-label">Resolution</InputLabel>
+        <Select
+          labelId="resolution-label"
+          value={resolution}
+          label="Resolution"
+          onChange={(event) =>
+            dispatch(setResolution(parseInt(event.target.value)))
+          }
+        >
+          <MenuItem value={200}>200x200</MenuItem>
+          <MenuItem value={400}>400x400</MenuItem>
+          <MenuItem value={600}>600x600</MenuItem>
+        </Select>
+      </FormControl>
+      <FormGroup>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={hypsometricTinting}
+              onChange={handleToggleHypsometricTinting}
+            />
+          }
+          label={<Typography variant="body2">Hypsometric Tinting</Typography>}
+        />
+      </FormGroup>
+    </Box>
+  );
+};
+
+export default ViewControls;
+
+
+
+================================================================
+End of Codebase
+================================================================
