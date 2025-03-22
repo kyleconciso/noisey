@@ -1,4 +1,3 @@
-// src/components/LayerList.jsx (Modified for text field within ListItemButton)
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -50,7 +49,6 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 
-// CORRECT: SortableItem is a separate component
 const SortableItem = ({
   layer,
   selectedLayerId,
@@ -73,7 +71,7 @@ const SortableItem = ({
     isDragging,
   } = useSortable({ id: layer.id });
 
-  const theme = useTheme(); //  CALL useTheme here
+  const theme = useTheme();
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -91,9 +89,8 @@ const SortableItem = ({
       sx={{
         mb: 1.5,
         p: 0,
-        borderRadius: theme.shape.borderRadius * 1.5, // Corrected: Use theme here
+        borderRadius: theme.shape.borderRadius * 1.5,
         transition: theme.transitions.create(
-          // Corrected: Use theme here
           ["box-shadow", "background-color"],
           {
             duration: theme.transitions.duration.short,
@@ -101,12 +98,12 @@ const SortableItem = ({
         ),
         border:
           selectedLayerId === layer.id
-            ? `1px solid ${alpha(theme.palette.primary.main, 0.5)}` // Corrected: Use theme here
-            : `1px solid ${alpha(theme.palette.divider, 0.1)}`, // Corrected: Use theme here
+            ? `1px solid ${alpha(theme.palette.primary.main, 0.5)}`
+            : `1px solid ${alpha(theme.palette.divider, 0.1)}`,
         backgroundColor:
           selectedLayerId === layer.id
-            ? alpha(theme.palette.primary.main, 0.05) // Corrected: Use theme here
-            : theme.palette.background.paper, // Corrected: Use theme here
+            ? alpha(theme.palette.primary.main, 0.05)
+            : theme.palette.background.paper,
         overflow: "hidden",
       }}
     >
@@ -118,11 +115,11 @@ const SortableItem = ({
           "&:hover": {
             backgroundColor:
               selectedLayerId === layer.id
-                ? alpha(theme.palette.primary.main, 0.1) // Corrected: Use theme here
-                : theme.palette.action.hover, // Corrected: Use theme here
+                ? alpha(theme.palette.primary.main, 0.1)
+                : theme.palette.action.hover,
           },
-          //display: "flex", // Removed, not necessary.
-          width: "100%", // Ensure it takes the full width
+
+          width: "100%",
         }}
       >
         <IconButton
@@ -131,7 +128,7 @@ const SortableItem = ({
           size="small"
           sx={{
             mr: 1,
-            color: theme.palette.action.disabled, // Corrected: Use theme here
+            color: theme.palette.action.disabled,
           }}
         >
           <DragIndicatorIcon />
@@ -146,15 +143,15 @@ const SortableItem = ({
             autoFocus
             size="small"
             sx={{
-              width: "60%", // Adjusted width
+              width: "60%",
             }}
             inputProps={{
               style: {
-                padding: 0, // Remove padding to align with ListItemText
+                padding: 0,
                 fontSize: "0.85rem",
               },
             }}
-            variant="standard" // No border when editing.
+            variant="standard"
           />
         ) : (
           <ListItemText
@@ -165,10 +162,10 @@ const SortableItem = ({
                 sx={{
                   color:
                     selectedLayerId === layer.id
-                      ? theme.palette.primary.main // Corrected: Use theme here
-                      : theme.palette.text.primary, // Corrected: Use theme here
+                      ? theme.palette.primary.main
+                      : theme.palette.text.primary,
                   fontSize: "0.85rem",
-                  ml: 0, // Remove default margin
+                  ml: 0,
                 }}
               >
                 {layer.name}
@@ -183,12 +180,11 @@ const SortableItem = ({
               edge="end"
               onClick={(e) => handleToggleVisibility(e, layer.id)}
               size="small"
-              // Removed color prop
               sx={{
                 mr: 1,
-                color: theme.palette.primary.main, // Consistent color
+                color: theme.palette.primary.main,
                 "&:hover": {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.1), // Add hover effect
+                  backgroundColor: alpha(theme.palette.primary.main, 0.1),
                 },
               }}
             >
@@ -203,7 +199,7 @@ const SortableItem = ({
               sx={{
                 color: theme.palette.error.main,
                 "&:hover": {
-                  backgroundColor: alpha(theme.palette.error.main, 0.1), // Add hover effect
+                  backgroundColor: alpha(theme.palette.error.main, 0.1),
                 },
               }}
             >
@@ -224,7 +220,6 @@ const LayerList = () => {
   const [editLayerId, setEditLayerId] = useState(null);
   const [tempName, setTempName] = useState("");
 
-  // ... (rest of your handler functions: handleAddLayer, handleLayerSelect, etc.) ...
   const handleAddLayer = () => {
     dispatch(
       addLayer({
@@ -237,8 +232,8 @@ const LayerList = () => {
         seed: Math.floor(Math.random() * 1000),
         weight: 0.5,
         visible: true,
-        bias: 0, // Add bias
-        blendMode: "normal", // Add blendMode
+        bias: 0,
+        blendMode: "normal",
       })
     );
   };
@@ -249,14 +244,14 @@ const LayerList = () => {
     } else {
       dispatch(setSelectedLayerId(layerId));
     }
-    setEditLayerId(null); // Exit edit mode if clicking a different layer
+    setEditLayerId(null);
     setTempName("");
   };
 
   const handleDelete = (e, layerId) => {
     e.stopPropagation();
     dispatch(deleteLayer(layerId));
-    setEditLayerId(null); // Exit edit mode if deleting
+    setEditLayerId(null);
     setTempName("");
   };
 
@@ -366,8 +361,8 @@ const LayerList = () => {
             {layers.map((layer) => (
               <SortableItem
                 key={layer.id}
-                layer={layer} // Pass the layer data
-                selectedLayerId={selectedLayerId} // Pass other props
+                layer={layer}
+                selectedLayerId={selectedLayerId}
                 handleLayerSelect={handleLayerSelect}
                 handleDoubleClick={handleDoubleClick}
                 editLayerId={editLayerId}
@@ -386,7 +381,7 @@ const LayerList = () => {
         <Paper
           elevation={0}
           sx={{
-            p: 2, // Reduced padding
+            p: 2,
             textAlign: "center",
             border: `1px dashed ${alpha(theme.palette.divider, 0.3)}`,
             borderRadius: theme.shape.borderRadius * 1.5,
@@ -394,9 +389,9 @@ const LayerList = () => {
         >
           <LayersIcon
             sx={{
-              fontSize: 32, // Reduced icon size
+              fontSize: 32,
               color: alpha(theme.palette.text.secondary, 0.5),
-              mb: 0.5, // Reduced margin
+              mb: 0.5,
             }}
           />
           <Typography variant="body2" color="text.secondary">
@@ -408,11 +403,11 @@ const LayerList = () => {
             startIcon={<AddIcon />}
             onClick={handleAddLayer}
             sx={{
-              mt: 1, // Reduced margin
+              mt: 1,
               borderRadius: theme.shape.borderRadius * 1.5,
               textTransform: "none",
-              fontSize: "0.8rem", // Reduced font size
-              padding: "4px 12px", // Reduced padding
+              fontSize: "0.8rem",
+              padding: "4px 12px",
             }}
           >
             Add Your First Layer

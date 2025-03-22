@@ -1,4 +1,3 @@
-// src/components/NoiseVisualizer.jsx (Modified height style)
 import React, { useState, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three-stdlib";
@@ -9,26 +8,24 @@ const NoiseVisualizer = ({ layers, settings }) => {
   const canvasRef = useRef(null);
   const threeContainerRef = useRef(null);
   const [rendererInstance, setRendererInstance] = useState(null);
-  const [controls, setControls] = useState(null); // Keep controls state
+  const [controls, setControls] = useState(null);
 
   const { viewMode, resolution, hypsometricTinting, hypsometricRanges } =
-    settings; // Get hypsometricRanges
+    settings;
 
   useEffect(() => {
-    // Cleanup previous instances
     if (rendererInstance) {
       rendererInstance.dispose();
       rendererInstance.forceContextLoss();
       if (rendererInstance.domElement) {
         rendererInstance.domElement.parentNode?.removeChild(
           rendererInstance.domElement
-        ); //clean up dom element
+        );
       }
-      setRendererInstance(null); // Clear renderer instance
+      setRendererInstance(null);
     }
 
     if (controls) {
-      // Dispose of controls
       controls.dispose();
       setControls(null);
     }
@@ -38,14 +35,14 @@ const NoiseVisualizer = ({ layers, settings }) => {
     } else {
       render3D();
     }
-  }, [layers, viewMode, resolution, hypsometricTinting, hypsometricRanges]); // Add hypsometricRanges as a dependency
+  }, [layers, viewMode, resolution, hypsometricTinting, hypsometricRanges]);
 
   const render2D = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
-    if (!ctx) return; // Check if context is available
+    if (!ctx) return;
 
     ctx.clearRect(0, 0, resolution, resolution);
 
@@ -64,7 +61,6 @@ const NoiseVisualizer = ({ layers, settings }) => {
       return;
     }
 
-    // Pre-calculate all noise layers
     const noiseLayers = visibleLayers.map((layer) => ({
       noise: generatePerlinNoise(
         resolution,
@@ -88,39 +84,35 @@ const NoiseVisualizer = ({ layers, settings }) => {
       for (let j = 0; j < noiseLayers.length; j++) {
         let { noise, blendMode, weight, bias } = noiseLayers[j];
         let value = noise[i];
-        value = Math.max(0, Math.min(1, value + bias)); // Apply bias and clamp
+        value = Math.max(0, Math.min(1, value + bias));
         let pixelValue = Math.floor(value * 255);
 
         let layerR, layerG, layerB;
 
         if (hypsometricTinting) {
-          // Apply hypsometric tinting using the ranges
           let foundRange = false;
           for (let k = 0; k < hypsometricRanges.length; k++) {
             const range = hypsometricRanges[k];
             if (pixelValue >= range.start && pixelValue <= range.end) {
-              const color = parseInt(range.color.substring(1), 16); // Convert hex to integer
+              const color = parseInt(range.color.substring(1), 16);
               layerR = (color >> 16) & 255;
               layerG = (color >> 8) & 255;
               layerB = color & 255;
               foundRange = true;
-              break; // Once we find a range, stop searching
+              break;
             }
           }
           if (!foundRange) {
-            //if no range check for default color
             layerR = pixelValue;
             layerG = pixelValue;
             layerB = pixelValue;
           }
         } else {
-          // Default grayscale
           layerR = pixelValue;
           layerG = pixelValue;
           layerB = pixelValue;
         }
 
-        // Apply blending modes
         switch (blendMode) {
           case "add":
             r += layerR * weight;
@@ -142,13 +134,13 @@ const NoiseVisualizer = ({ layers, settings }) => {
             g = 255 - ((255 - g) * (255 - layerG * weight)) / 255;
             b = 255 - ((255 - b) * (255 - layerB * weight)) / 255;
             break;
-          default: // 'normal'
+          default:
             r += layerR * weight;
             g += layerG * weight;
             b += layerB * weight;
         }
       }
-      //normalize layer color and aplly
+
       let totalWeight = visibleLayers.reduce(
         (acc, layer) => acc + layer.weight,
         0
@@ -165,20 +157,20 @@ const NoiseVisualizer = ({ layers, settings }) => {
 
     ctx.putImageData(imageData, 0, 0);
   };
-  // ... (render3D remains unchanged) ...
+
   const render3D = () => {
     const container = threeContainerRef.current;
     if (!container) return;
-    // Cleanup previous Three.js scene, crucial for preventing memory leaks
+
     while (container.firstChild) {
       container.removeChild(container.firstChild);
     }
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000); // Aspect ratio set to 1
+    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(resolution, resolution); // Use resolution for both dimensions
+    renderer.setSize(resolution, resolution);
     container.appendChild(renderer.domElement);
-    setRendererInstance(renderer); // Set the renderer instance *after* appending
+    setRendererInstance(renderer);
     camera.position.set(5, 5, 5);
     camera.lookAt(0, 0, 0);
     const ambientLight = new THREE.AmbientLight(0x404040);
@@ -207,14 +199,13 @@ const NoiseVisualizer = ({ layers, settings }) => {
         const noise = generatePerlinNoise(
           gridSize,
           gridSize,
-          layer.scale / 10, // Adjust scale for 3D
+          layer.scale / 10,
           layer.octaves,
           layer.persistence,
           layer.lacunarity,
           layer.seed
         );
         for (let i = 0; i < noise.length; i++) {
-          // Apply bias and clamp:
           const biasedNoise = Math.max(0, Math.min(1, noise[i] + layer.bias));
           combinedNoise[i] += biasedNoise * layer.weight;
         }
@@ -228,13 +219,13 @@ const NoiseVisualizer = ({ layers, settings }) => {
       const vertices = geometry.attributes.position.array;
       for (let i = 0, j = 0; i < vertices.length; i += 3, j++) {
         const height = combinedNoise[j];
-        vertices[i + 2] = height * 2; // Adjust height scale
+        vertices[i + 2] = height * 2;
       }
       geometry.computeVertexNormals();
       const material = new THREE.MeshStandardMaterial({
         color: 0x808080,
         wireframe: false,
-        flatShading: true, // Keep flat shading
+        flatShading: true,
       });
       const terrain = new THREE.Mesh(geometry, material);
       terrain.rotation.x = -Math.PI / 2;
@@ -243,7 +234,7 @@ const NoiseVisualizer = ({ layers, settings }) => {
     const newControls = new OrbitControls(camera, renderer.domElement);
     setControls(newControls);
     const animate = () => {
-      if (!rendererInstance) return; // prevent animate from running if renderer is null
+      if (!rendererInstance) return;
       requestAnimationFrame(animate);
       newControls.update();
       renderer.render(scene, camera);
@@ -254,16 +245,16 @@ const NoiseVisualizer = ({ layers, settings }) => {
   return (
     <Box sx={{ position: "relative", height: "100%" }}>
       {" "}
-      {/* Added height: 100% */}
+      {}
       {viewMode === "2d" ? (
         <canvas
           ref={canvasRef}
           width={resolution}
           height={resolution}
           style={{
-            width: "100%", // Make it responsive, take full width
-            height: "100%", // Changed to 100%
-            objectFit: "contain", // Ensure the canvas content is scaled correctly
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
             boxShadow: "0px 0px 50px rgba(0, 0, 0, 0.5)",
           }}
         />
@@ -272,7 +263,7 @@ const NoiseVisualizer = ({ layers, settings }) => {
           ref={threeContainerRef}
           sx={{
             width: "100%",
-            height: "100%", // Changed to 100%
+            height: "100%",
             boxShadow: "0px 0px 50px rgba(0, 0, 0, 0.5)",
           }}
         />

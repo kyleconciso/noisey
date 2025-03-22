@@ -1,4 +1,3 @@
-// src/components/AppLayout.jsx
 import React, {
   useState,
   useReducer,
@@ -41,7 +40,7 @@ import {
 import NoiseVisualization from "../components/NoiseVisualizer";
 import LayerList from "./LayerList";
 import SelectedLayerControls from "./SelectedLayerControls";
-import { setLayers } from "../store/layersSlice"; // Removed unused imports
+import { setLayers } from "../store/layersSlice";
 import {
   setViewMode,
   setResolution as setSettingsResolution,
@@ -63,7 +62,6 @@ import ColorPaletteControls from "./ColorPaletteControls";
 
 const drawerWidth = 280;
 
-// History reducer for Undo/Redo (No changes from previous version)
 const historyReducer = (state, action) => {
   switch (action.type) {
     case "ADD_STATE":
@@ -119,26 +117,23 @@ const AppLayout = () => {
     setOpenSnackbar(false);
   };
 
-  // Undo/Redo Handlers
   const handleUndo = () => {
-    isFromHistory.current = true; // Set ref before dispatch
+    isFromHistory.current = true;
     dispatchHistory({ type: "UNDO" });
   };
 
   const handleRedo = () => {
-    isFromHistory.current = true; // Set ref before dispatch
+    isFromHistory.current = true;
     dispatchHistory({ type: "REDO" });
   };
 
-  // Update layers from history
   useEffect(() => {
     if (isFromHistory.current) {
       dispatch(setLayers({ layers: history.present }));
-      isFromHistory.current = false; // Reset ref after dispatch
+      isFromHistory.current = false;
     }
   }, [history, dispatch]);
 
-  // Settings Menu Handlers
   const handleSettingsClick = (event) => {
     setSettingsAnchorEl(event.currentTarget);
   };
@@ -147,7 +142,6 @@ const AppLayout = () => {
     setSettingsAnchorEl(null);
   };
 
-  // Color Palette Menu Handlers
   const handleColorPaletteClick = (event) => {
     setColorPaletteAnchorEl(event.currentTarget);
   };
@@ -156,7 +150,6 @@ const AppLayout = () => {
     setColorPaletteAnchorEl(null);
   };
 
-  // Help Dialog Handlers
   const handleHelpOpen = () => {
     setHelpOpen(true);
   };
@@ -165,25 +158,22 @@ const AppLayout = () => {
     setHelpOpen(false);
   };
 
-  // View Mode Handler
   const handleViewModeChange = (event, newViewMode) => {
     if (newViewMode !== null) {
       dispatch(setViewMode(newViewMode));
     }
   };
 
-  // Resolution Handler
   const handleResolutionChange = (event, newValue) => {
-    dispatch(setSettingsResolution(newValue)); // Use the settingsSlice action
+    dispatch(setSettingsResolution(newValue));
   };
 
-  // Keyboard Shortcut Handler
   const handleKeyDown = useCallback(
     (event) => {
       const ctrlOrCmd = event.ctrlKey || event.metaKey;
 
       if (ctrlOrCmd && event.key === "z") {
-        event.preventDefault(); // Prevent browser's default undo
+        event.preventDefault();
         handleUndo();
       } else if (ctrlOrCmd && event.shiftKey && event.key === "Z") {
         event.preventDefault();
@@ -230,9 +220,7 @@ const AppLayout = () => {
     };
   }, [handleKeyDown]);
 
-  // Add state to history after layer actions
   useEffect(() => {
-    // Only add to history if the layers have actually changed AND it is not a history change itself.
     if (
       !isFromHistory.current &&
       JSON.stringify(layers) !== JSON.stringify(history.present)
@@ -243,7 +231,7 @@ const AppLayout = () => {
 
   const saveConfig = () => {
     try {
-      const config = JSON.stringify(layers, null, 2); // Pretty print JSON
+      const config = JSON.stringify(layers, null, 2);
       const blob = new Blob([config], { type: "application/json" });
       const url = URL.createObjectURL(blob);
 
@@ -291,7 +279,7 @@ const AppLayout = () => {
     };
 
     reader.readAsText(file);
-    // Reset the input value to allow loading the same file again
+
     event.target.value = null;
     setFileHover(false);
   };
@@ -318,7 +306,7 @@ const AppLayout = () => {
             ⛰️ noisey
           </Typography>
 
-          {/* Undo/Redo Group */}
+          {}
           <Box sx={{ display: "flex", alignItems: "center", mr: 1 }}>
             <Tooltip title="Undo (Ctrl/Cmd + Z)">
               <IconButton
@@ -344,16 +332,16 @@ const AppLayout = () => {
 
           <Box sx={{ py: 1 }}>
             {" "}
-            {/* Add padding around the divider */}
+            {}
             <Divider
               orientation="vertical"
               flexItem
               sx={{ borderColor: "rgba(255, 255, 255, 0.2)" }}
             />{" "}
-            {/* Lighter divider */}
+            {}
           </Box>
 
-          {/* File Operations Group */}
+          {}
           <Box sx={{ display: "flex", alignItems: "center", mr: 1 }}>
             <Tooltip title="Export Configuration">
               <IconButton
@@ -385,16 +373,16 @@ const AppLayout = () => {
 
           <Box sx={{ py: 1 }}>
             {" "}
-            {/* Add padding around the divider */}
+            {}
             <Divider
               orientation="vertical"
               flexItem
               sx={{ borderColor: "rgba(255, 255, 255, 0.2)" }}
             />{" "}
-            {/* Lighter divider */}
+            {}
           </Box>
 
-          {/* View Mode Toggle */}
+          {}
           <Box sx={{ display: "flex", alignItems: "center", mr: 1 }}>
             <ToggleButtonGroup
               value={settings.viewMode}
@@ -414,16 +402,16 @@ const AppLayout = () => {
 
           <Box sx={{ py: 1 }}>
             {" "}
-            {/* Add padding around the divider */}
+            {}
             <Divider
               orientation="vertical"
               flexItem
               sx={{ borderColor: "rgba(255, 255, 255, 0.2)" }}
             />{" "}
-            {/* Lighter divider */}
+            {}
           </Box>
 
-          {/* Settings Button and Popover */}
+          {}
           <Box sx={{ display: "flex", alignItems: "center", mr: 1 }}>
             <Tooltip title="Settings">
               <IconButton
@@ -464,7 +452,7 @@ const AppLayout = () => {
             </Popover>
           </Box>
 
-          {/* Color Palette Button and Popover */}
+          {}
           <Box sx={{ display: "flex", alignItems: "center", mr: 1 }}>
             <Tooltip title="Color Palette">
               <IconButton
@@ -495,16 +483,16 @@ const AppLayout = () => {
 
           <Box sx={{ py: 1 }}>
             {" "}
-            {/* Add padding around the divider */}
+            {}
             <Divider
               orientation="vertical"
               flexItem
               sx={{ borderColor: "rgba(255, 255, 255, 0.2)" }}
             />{" "}
-            {/* Lighter divider */}
+            {}
           </Box>
 
-          {/* Help Button and Dialog */}
+          {}
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Tooltip title="Help">
               <IconButton color="inherit" onClick={handleHelpOpen} size="small">

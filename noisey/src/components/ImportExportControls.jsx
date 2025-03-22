@@ -1,4 +1,3 @@
-// src/components/ImportExportControls.jsx
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setLayers } from "../store/layersSlice";
@@ -41,7 +40,7 @@ const ImportExportControls = () => {
 
   const saveConfig = () => {
     try {
-      const config = JSON.stringify(layers, null, 2); // Pretty print JSON
+      const config = JSON.stringify(layers, null, 2);
       const blob = new Blob([config], { type: "application/json" });
       const url = URL.createObjectURL(blob);
 
@@ -89,7 +88,7 @@ const ImportExportControls = () => {
     };
 
     reader.readAsText(file);
-    // Reset the input value to allow loading the same file again
+
     event.target.value = null;
     setFileHover(false);
   };
@@ -98,7 +97,7 @@ const ImportExportControls = () => {
     <Paper
       elevation={0}
       sx={{
-        mt: 2, // Reduced margin
+        mt: 2,
         borderRadius: theme.shape.borderRadius * 1.5,
         backgroundColor: alpha(theme.palette.background.paper, 0.8),
         border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
@@ -109,8 +108,8 @@ const ImportExportControls = () => {
       <Box
         display="flex"
         alignItems="center"
-        p={2} // Reduced padding
-        pb={1} // Reduced padding
+        p={2}
+        pb={1}
         sx={{
           backgroundColor: alpha(theme.palette.primary.main, 0.05),
           borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
@@ -120,7 +119,7 @@ const ImportExportControls = () => {
           sx={{
             mr: 1,
             color: theme.palette.primary.main,
-            fontSize: 20, // Reduced size
+            fontSize: 20,
           }}
         />
         <Typography variant="h6" fontWeight="500" sx={{ fontSize: "1rem" }}>
@@ -130,14 +129,14 @@ const ImportExportControls = () => {
 
       <Box p={2}>
         {" "}
-        {/* Reduced padding */}
+        {}
         <Typography
           variant="body2"
           color="text.secondary"
-          mb={2} // Reduced margin
+          mb={2}
           sx={{
             borderLeft: `3px solid ${alpha(theme.palette.info.main, 0.7)}`,
-            pl: 1, // Reduced padding
+            pl: 1,
             py: 0.5,
             backgroundColor: alpha(theme.palette.info.main, 0.05),
             borderRadius: `0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0`,
@@ -148,7 +147,7 @@ const ImportExportControls = () => {
         </Typography>
         <Stack spacing={2}>
           {" "}
-          {/* Reduced spacing */}
+          {}
           <Tooltip title="Save current configuration to a JSON file">
             <Button
               variant="contained"
@@ -156,7 +155,7 @@ const ImportExportControls = () => {
               startIcon={<DownloadIcon />}
               onClick={saveConfig}
               sx={{
-                py: 1, // Reduced padding
+                py: 1,
                 borderRadius: theme.shape.borderRadius * 1.5,
                 backgroundColor: theme.palette.success.main,
                 "&:hover": {
@@ -165,7 +164,7 @@ const ImportExportControls = () => {
                 textTransform: "none",
                 fontWeight: 500,
                 boxShadow: theme.shadows[2],
-                fontSize: "0.8rem", // Reduced font size
+                fontSize: "0.8rem",
               }}
             >
               Export
@@ -177,7 +176,7 @@ const ImportExportControls = () => {
             onMouseEnter={() => setFileHover(true)}
             onMouseLeave={() => setFileHover(false)}
             sx={{
-              p: 1, // Reduced padding
+              p: 1,
               border: `2px dashed ${
                 fileHover
                   ? theme.palette.primary.main
@@ -212,8 +211,8 @@ const ImportExportControls = () => {
             <CloudUploadIcon
               color="primary"
               sx={{
-                fontSize: 32, // Reduced icon size
-                mb: 0.5, // Reduced margin
+                fontSize: 32,
+                mb: 0.5,
                 transition: theme.transitions.create(["transform"], {
                   duration: theme.transitions.duration.short,
                 }),

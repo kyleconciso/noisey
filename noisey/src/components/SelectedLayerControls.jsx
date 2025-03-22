@@ -1,4 +1,3 @@
-// src/components/SelectedLayerControls.jsx (No changes needed)
 import React from "react";
 import { useSelector } from "react-redux";
 import LayerControls from "./LayerControls";

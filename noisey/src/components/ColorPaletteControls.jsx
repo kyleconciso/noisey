@@ -1,4 +1,3 @@
-// src/components/ColorPaletteControls.jsx
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -52,7 +51,7 @@ const ColorPaletteControls = () => {
               <TextField
                 label="Name"
                 value={range.name}
-                disabled // No range edition yet.
+                disabled
                 variant="outlined"
                 size="small"
                 sx={{ mr: 1, width: "40%" }}
@@ -61,7 +60,7 @@ const ColorPaletteControls = () => {
                 label="Start"
                 type="number"
                 value={range.start}
-                disabled // No range edition yet.
+                disabled
                 variant="outlined"
                 size="small"
                 sx={{ mr: 1, width: "20%" }}
@@ -70,7 +69,7 @@ const ColorPaletteControls = () => {
                 label="End"
                 type="number"
                 value={range.end}
-                disabled // No range edition yet.
+                disabled
                 variant="outlined"
                 size="small"
                 sx={{ mr: 1, width: "20%" }}

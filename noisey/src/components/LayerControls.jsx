@@ -1,4 +1,3 @@
-// src/components/LayerControls.jsx (Modified for consistent button colors)
 import React from "react";
 import { useDispatch } from "react-redux";
 import {
@@ -60,21 +59,21 @@ const LayerControls = ({ layer }) => {
     <Paper
       elevation={2}
       sx={{
-        p: 2, // Reduced padding here
-        mb: 2, // Reduced margin here
+        p: 2,
+        mb: 2,
         borderRadius: theme.shape.borderRadius * 1.5,
         border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
       }}
     >
       <Grid container spacing={1}>
-        {/* Reduced spacing between grid items */}
+        {}
         <Grid
           item
           xs={12}
           display="flex"
           justifyContent="space-between"
           alignItems="center"
-          sx={{ mb: 0.5 }} // Reduced margin
+          sx={{ mb: 0.5 }}
         >
           <Box display="flex" alignItems="center">
             <TuneIcon sx={{ mr: 1, color: theme.palette.primary.main }} />
@@ -91,14 +90,13 @@ const LayerControls = ({ layer }) => {
               <IconButton
                 onClick={handleToggleVisibility}
                 size="small"
-                //color={layer.visible ? "primary" : "default"} Removed
                 sx={{
                   mr: 1,
-                  color: theme.palette.primary.main, // Consistent color
+                  color: theme.palette.primary.main,
                   "&:hover": {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.1), // Add hover effect
+                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
                   },
-                }} // Reduced margin
+                }}
               >
                 {layer.visible ? <VisibilityIcon /> : <VisibilityOffIcon />}
               </IconButton>
@@ -108,11 +106,11 @@ const LayerControls = ({ layer }) => {
                 onClick={handleDuplicate}
                 size="small"
                 sx={{
-                  color: theme.palette.primary.main, // Use primary color
+                  color: theme.palette.primary.main,
                   "&:hover": {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.1), // Use primary color for hover
+                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
                   },
-                  mr: 1, // Reduced margin
+                  mr: 1,
                 }}
               >
                 <FileCopyIcon />
@@ -135,10 +133,10 @@ const LayerControls = ({ layer }) => {
           </Box>
         </Grid>
         <Grid item xs={12}>
-          <Divider sx={{ mb: 1 }} /> {/* Reduced margin */}
+          <Divider sx={{ mb: 1 }} /> {}
         </Grid>
 
-        {/* Seed (Moved to top) */}
+        {}
         <Grid item xs={12}>
           <Typography
             variant="body2"
@@ -161,7 +159,7 @@ const LayerControls = ({ layer }) => {
               sx: {
                 borderRadius: theme.shape.borderRadius * 1.5,
                 border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-                padding: "4px 8px", // Reduced padding
+                padding: "4px 8px",
                 height: "32px",
               },
             }}
@@ -175,7 +173,7 @@ const LayerControls = ({ layer }) => {
             gutterBottom
             id={`scale-slider-${layer.id}`}
             color="text.secondary"
-            sx={{ mb: -0.5 }} // Negative margin to pull slider closer
+            sx={{ mb: -0.5 }}
           >
             Scale
           </Typography>
@@ -189,9 +187,9 @@ const LayerControls = ({ layer }) => {
             aria-labelledby={`scale-slider-${layer.id}`}
             sx={{
               color: theme.palette.primary.main,
-              height: 2, // Reduced height
+              height: 2,
               "& .MuiSlider-thumb": {
-                width: 12, // Reduced thumb size
+                width: 12,
                 height: 12,
               },
             }}
@@ -289,7 +287,7 @@ const LayerControls = ({ layer }) => {
           />
         </Grid>
 
-        {/* Bias */}
+        {}
         <Grid item xs={12}>
           <Typography
             variant="body2"
@@ -320,7 +318,7 @@ const LayerControls = ({ layer }) => {
           />
         </Grid>
 
-        {/* Blend Mode */}
+        {}
         <Grid item xs={12}>
           <FormControl fullWidth size="small">
             <InputLabel
